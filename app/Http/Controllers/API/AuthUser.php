@@ -27,6 +27,13 @@ class AuthUser extends Controller
                 "error" => $validator->errors()->all()
             ], 300);
         }
+        if (User::where('email', $request->email)->exists()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User with this email already exists.',
+                'error' => ['Email already in use.']
+            ], 409);
+        }
         $data = User::create(['name' => $request->name, 'email' => $request->email, 'password' => $request->password]);
         return response()->json([
             'status' => true,
@@ -46,24 +53,25 @@ class AuthUser extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
-                'message' => "Cannot validate the Credentials",
-                "error" => $validator->errors()->all()
-            ], 300);
+                'message' => "Validation failed",
+                'errors' => $validator->errors()->all()
+            ], 422);
         }
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
             return response()->json([
                 'status' => true,
                 'message' => "User Logged In  successfully",
+                'user' => $user,
                 'token' => $user->createToken('API Token')->plainTextToken,
                 'token_type' => 'bearer'
             ], 200);
         } else {
             return response()->json([
                 'status' => false,
-                'message' => "Error while Login",
-                "error" => $validator->errors()->all()
-            ], 304);
+                'message' => "Incorrect email or password",
+                'errors' => ['Incorrect email or password']
+            ], 401);
         }
     }
     public function logout(Request $request)
