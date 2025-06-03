@@ -24,7 +24,7 @@ class User extends Authenticatable
         'password',
     ];
 
-    public function event()
+    public function events()
     {
         return $this->hasMany(Event::class);
         //One user has many posts

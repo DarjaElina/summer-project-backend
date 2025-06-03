@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\API\AuthUser;
+use App\Http\Controllers\API\EventController;
+use App\Http\Controllers\EventController as ControllersEventController;
+use Illuminate\Foundation\Console\ApiInstallCommand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,3 +23,6 @@ Route::post('login', [AuthUser::class, 'login'])->name('login-controller');
 
 
 Route::post('logout', [AuthUser::class, 'logout'])->name('logout')->middleware('auth:sanctum');
+
+//Routes for the Events here
+Route::apiResource('events', EventController::class)->middleware('auth:sanctum');
