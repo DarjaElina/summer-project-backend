@@ -172,9 +172,7 @@ class EventController extends Controller
         if (file_exists($filePath)) {
             unlink($filePath);
         }
-
         $event->delete();
-
         return response()->json([
             'status' => true,
             'message' => "Event deleted successfully",
