@@ -16,11 +16,13 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->string('title');
-            $table->string('name');
             $table->text('description');
-            $table->string('image');
+            $table->string('type');
+            $table->string('image_url');
+            $table->string('location');
             $table->string('lat');
             $table->string('lon');
+            $table->dateTime('date');
             $table->timestamps();
         });
     }
