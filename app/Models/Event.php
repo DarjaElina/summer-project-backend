@@ -3,15 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Event extends Model
 {
+    use HasFactory;
 
-
-    protected $fillable = ['title', 'name', 'description', 'image', 'lat', 'lon'];
+    protected $fillable = ['title', 'description', 'image_url', 'lat', 'lon', 'type', 'date', 'location'];
     public function user()
     {
-        return $this->belongsto(User::class);
+        return $this->belongsTo(User::class);
         //Each events belongs to users
     }
 }
