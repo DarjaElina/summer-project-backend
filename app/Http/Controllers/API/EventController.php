@@ -20,7 +20,7 @@ class EventController extends Controller
         return response()->json([
             'status' => true,
             'message' => "All post data",
-            'data' => $data
+            'events' => $user->events
         ], 200);
     }
 
@@ -29,44 +29,42 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'title' => 'required',
-                'name' => 'required',
-                'description' => 'required',
-                'image' => 'required|file|mimes:jpg,jpeg,png',
-                'lat' => 'required',
-                'lon' => 'required',
-            ]
-        );
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'image' => 'required|file|mimes:jpg,jpeg,png',
+            'type' => 'nullable|string',
+            'date' => 'nullable|date',
+            'location' => 'nullable|string',
+        ]);
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
-                'message' => "Cannot Store the Events in the DB::Validation error",
-                "error" => $validator->errors()->all()
-            ], 300);
+                'message' => 'Validation errors',
+                'errors' => $validator->errors(),
+            ], 422);
         }
-        $img = $request->image;
-        $ext = $img->getClientOriginalExtension();
-        $imageName = time() . '.' . $ext;
-        $img->move(public_path() . '/uploads', $imageName);
 
-        $user = $request->user();
-        $event = new Event([
-            'name' => $request->title,
+        $imageName = time() . '.' . $request->image->getClientOriginalExtension();
+        $request->image->move(public_path('uploads'), $imageName);
+
+        $event = $request->user()->events()->create([
             'title' => $request->title,
             'description' => $request->description,
-            'image' => $imageName,
+            'image_url' => $imageName,
             'lat' => $request->lat,
             'lon' => $request->lon,
+            'type' => $request->type ?? 'general',
+            'date' => $request->date ?? now(),
+            'location' => $request->location ?? 'Unknown',
         ]);
-        $user->events()->save($event);
+
         return response()->json([
             'status' => true,
-            'message' => "Event created successfully",
+            'message' => 'Event created successfully',
             'event' => $event,
-        ], 200);
+        ], 201);
     }
 
     /**
@@ -172,9 +170,7 @@ class EventController extends Controller
         if (file_exists($filePath)) {
             unlink($filePath);
         }
-
         $event->delete();
-
         return response()->json([
             'status' => true,
             'message' => "Event deleted successfully",
