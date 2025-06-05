@@ -52,7 +52,7 @@ class EventController extends Controller
         $event = $request->user()->events()->create([
             'title' => $request->title,
             'description' => $request->description,
-            'image_url' => $imageName,
+            'image_url' => url('uploads/' . $imageName),
             'lat' => $request->lat,
             'lon' => $request->lon,
             'type' => $request->type ?? 'general',
