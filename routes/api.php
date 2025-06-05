@@ -25,4 +25,12 @@ Route::post('login', [AuthUser::class, 'login'])->name('login-controller');
 Route::post('logout', [AuthUser::class, 'logout'])->name('logout')->middleware('auth:sanctum');
 
 //Routes for the Events here
-Route::apiResource('events', EventController::class)->middleware('auth:sanctum');
+Route::get('/events/public', [EventController::class, 'publicEvents']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/events', [EventController::class, 'index']);
+    Route::post('/events', [EventController::class, 'store']);
+    Route::get('/events/{id}', [EventController::class, 'show']);
+    Route::put('/events/{id}', [EventController::class, 'update']);
+    Route::delete('/events/{id}', [EventController::class, 'destroy']);
+});
+
