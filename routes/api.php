@@ -15,7 +15,7 @@ Route::controller(AuthUser::class)->group(function () {
 
 // Contact form route
 Route::post('contact', [ContactController::class, 'store'])->name('contact.store');
-
+Route::get('/events/public', [EventController::class, 'publicEvents']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     // Event routes
-    Route::apiResource('events', EventController::class);
+    // Route::apiResource('events', EventController::class);
 });
 
 Route::get('login', function () {
@@ -36,7 +36,7 @@ Route::post('login', [AuthUser::class, 'login'])->name('login-controller');
 Route::post('logout', [AuthUser::class, 'logout'])->name('logout')->middleware('auth:sanctum');
 
 //Routes for the Events here
-Route::get('/events/public', [EventController::class, 'publicEvents']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events', [EventController::class, 'index']);
     Route::post('/events', [EventController::class, 'store']);
