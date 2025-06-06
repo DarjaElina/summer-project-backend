@@ -9,17 +9,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Sign_UP_Form</title>
+    <title>Login Form</title>
 </head>
 
 <body>
     <h1>Hi Now If You are registered please Log in here: Please go Ahead::👇</h1>
-    <form action="{{ route('login') }}" method="POST">
+    <form action="{{ route('login.store') }}" method="POST">
         @csrf
-        <input type="text" name="email" id="" placeholder="Enter your Email">
-        <input type="text" name="password" id="" placeholder="Enter your Password">
+        <input type="email" name="email" id="" placeholder="Enter your Email">
+        <input type="password" name="password" id="" placeholder="Enter your Password">
         <button type="submit">Log In</button>
     </form>
+    <h2>Don't have an account? <a href="{{ route('signup') }}">Sign up</a></h2>
     @if ($errors->any())
         <ul>
             @foreach ($errors->all() as $error)
