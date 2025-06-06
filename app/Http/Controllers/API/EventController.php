@@ -12,16 +12,26 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function publicEvents()
+    {
+        $events = Event::where('is_public', true)->latest()->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => "Public events",
+            'events' => $events
+        ]);
+    }
     public function index(Request $request)
     {
         $user = $request->user();
-        $data['events'] = $user->events;
-        // $data['events'] = Event::all();
+        $events = $user->events()->latest()->get();
+    
         return response()->json([
             'status' => true,
-            'message' => "All post data",
-            'events' => $user->events
-        ], 200);
+            'message' => "User's events",
+            'events' => $events
+        ]);    
     }
 
     /**
@@ -36,6 +46,7 @@ class EventController extends Controller
             'type' => 'nullable|string',
             'date' => 'nullable|date',
             'location' => 'nullable|string',
+            'is_public' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -52,12 +63,13 @@ class EventController extends Controller
         $event = $request->user()->events()->create([
             'title' => $request->title,
             'description' => $request->description,
-            'image_url' => $imageName,
+            'image_url' => url('uploads/' . $imageName),
             'lat' => $request->lat,
             'lon' => $request->lon,
             'type' => $request->type ?? 'general',
             'date' => $request->date ?? now(),
             'location' => $request->location ?? 'Unknown',
+            'is_public' => $request->input('is_public') == '1',
         ]);
 
         return response()->json([
