@@ -9,9 +9,11 @@
 </head>
 
 <body>
-    <h1>This is our Summer Project Backend ☀️</h1>
-    <a href="{{ route('signup') }}">Sign UP</a><br>
-    <a href="{{ route('login') }}">Login</a>
+    <h1>Welcome to Event Planner</h1>
+    <div>
+        <a href="{{ route('signup') }}">Sign Up</a>
+        <a href="{{ route('login') }}">Login</a>
+    </div>
 </body>
 
 </html>
