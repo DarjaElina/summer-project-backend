@@ -14,13 +14,12 @@ class EventController extends Controller
      */
     public function publicEvents()
     {
-        $events = Event::where('is_public', true)->latest()->get();
-
-        return response()->json([
-            'status' => true,
-            'message' => "Public events",
-            'events' => $events
-        ]);
+        $events = Event::where('is_public', true)
+            ->latest()
+            ->take(5)
+            ->get();
+    
+        return response()->json(['events' => $events]);
     }
     public function index(Request $request)
     {

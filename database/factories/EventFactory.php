@@ -25,6 +25,7 @@ class EventFactory extends Factory
             'type' => $this->faker->randomElement(['general', 'course', 'volunteering', 'sports', 'music', 'art and culture', 'food and drink', 'networking', 'online', 'kids and family']),
             'image_url' => 'https://images.unsplash.com/photo-1472653431158-6364773b2a56?q=80&w=2740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             'user_id' => User::factory(),
+            'is_public' => '1'
         ];
     }
 }
