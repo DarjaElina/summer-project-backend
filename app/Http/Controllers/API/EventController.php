@@ -124,10 +124,8 @@ class EventController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
-                'name' => 'required',
                 'title' => 'required',
                 'description' => 'required',
-                'image' => 'nullable|file|mimes:jpg,jpeg,png',
                 'lat' => 'required',
                 'lon' => 'required',
             ]
@@ -140,7 +138,7 @@ class EventController extends Controller
             ], 300);
         }
 
-        $eventImage = Event::select('id', 'image')->where('id', $id)->get();
+        $eventImage = Event::select('id', 'image_url')->where('id', $id)->get();
         // $eventImage = Event::find($id);
         // dd($eventImage);
         // if ($request->image != '') {
@@ -165,10 +163,8 @@ class EventController extends Controller
             ->where('user_id', $user->id) // 🔐 Ensure it's the user's own event
             ->first();
         $event->update([
-            'name' => $request->name,
             'title' => $request->title,
             'description' => $request->description,
-            'image' => $imageName,
             'lat' => $request->lat,
             'lon' => $request->lon,
         ]);
@@ -196,7 +192,7 @@ class EventController extends Controller
             ], 403);
         }
 
-        $filePath = public_path('/uploads/' . $event->image);
+        $filePath = public_path('/uploads/' . $event->image_url);
         if (file_exists($filePath)) {
             unlink($filePath);
         }
