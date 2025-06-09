@@ -92,6 +92,25 @@ class EventController extends Controller
         ], 200);
     }
 
+    public function showPublic(string $id)
+    {
+        $event = Event::where('id', $id)
+            ->where('is_public', true)
+            ->first();
+
+        if (!$event) {
+            return response()->json([
+                'status' => false,
+                'message' => "Public event not found",
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => "Public event loaded successfully",
+            'event' => $event,
+        ], 200);
+    }
     /**
      * Update the specified resource in storage.
      */
