@@ -27,6 +27,7 @@ Route::controller(AuthUser::class)->group(function () {
 // Contact form route
 Route::post('contact', [ContactController::class, 'store'])->name('contact.store');
 Route::get('/events/public', [EventController::class, 'publicEvents']);
+Route::get('/events/public/{id}', [EventController::class, 'showPublic']);
 
 // Contact form route
 Route::post('contact', [ContactController::class, 'store'])->name('contact.store');
