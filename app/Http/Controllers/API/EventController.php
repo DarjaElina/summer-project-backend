@@ -128,6 +128,8 @@ class EventController extends Controller
                 'description' => 'required',
                 'lat' => 'required',
                 'lon' => 'required',
+                'date' => 'required',
+                'is_public' => 'nullable|boolean',
             ]
         );
         if ($validator->fails()) {
@@ -167,6 +169,8 @@ class EventController extends Controller
             'description' => $request->description,
             'lat' => $request->lat,
             'lon' => $request->lon,
+            'date' => $request->date,
+            'is_public' => $request->is_public
         ]);
 
         return response()->json([
