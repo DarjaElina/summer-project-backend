@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class EventController extends Controller
 {
@@ -38,6 +39,7 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate inputs
         $validator = Validator::make($request->all(), [
             'title' => 'required|string',
             'description' => 'required|string',
@@ -46,6 +48,8 @@ class EventController extends Controller
             'date' => 'nullable|date',
             'location' => 'nullable|string',
             'is_public' => 'nullable|boolean',
+            'lat' => 'nullable|numeric',
+            'lon' => 'nullable|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -56,13 +60,14 @@ class EventController extends Controller
             ], 422);
         }
 
-        $imageName = time() . '.' . $request->image->getClientOriginalExtension();
-        $request->image->move(public_path('uploads'), $imageName);
+        // Upload image to Cloudinary
+        $uploadedImage = Cloudinary::upload($request->file('image')->getRealPath());
 
+        // Create event with Cloudinary image URL
         $event = $request->user()->events()->create([
             'title' => $request->title,
             'description' => $request->description,
-            'image_url' => url('uploads/' . $imageName),
+            'image_url' => $uploadedImage->getSecurePath(),  // Cloudinary URL
             'lat' => $request->lat,
             'lon' => $request->lon,
             'type' => $request->type ?? 'general',
