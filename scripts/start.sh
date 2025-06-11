@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
-echo "Running composer"
-composer install --no-dev --working-dir=/var/www/html
 
-echo "Caching config..."
-php artisan config:cache
+# Run deploy tasks
+./laravel-deploy.sh
 
-echo "Caching routes..."
-php artisan route:cache
-
-echo "Running migrations..."
-php artisan migrate --force
+# Start nginx + php-fpm server (from the richarvey image)
+echo "Starting nginx + php-fpm..."
+exec /usr/local/bin/start-nginx
