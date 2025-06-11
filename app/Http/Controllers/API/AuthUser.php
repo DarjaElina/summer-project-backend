@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+// CLOUDINARY_URL=cloudinary://516533875166862:kv-QmS0vBQcQoMR-n9hIppxZ5fI@dy0k0hjzv
+
 class AuthUser extends Controller
 {
     public function signup(Request $request)

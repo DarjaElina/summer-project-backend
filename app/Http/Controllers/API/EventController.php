@@ -60,14 +60,20 @@ class EventController extends Controller
             ], 422);
         }
 
-        // Upload image to Cloudinary
-        $uploadedImage = Cloudinary::upload($request->file('image')->getRealPath());
+        $filePath = $request->file('image')->getRealPath();
 
-        // Create event with Cloudinary image URL
+        $uploadResult = Cloudinary::uploadApi()->upload($filePath, [
+            'folder' => 'events',
+        ]);
+    
+        $url = $uploadResult['secure_url'];
+        $public_id = $uploadResult['public_id'];
+    
         $event = $request->user()->events()->create([
             'title' => $request->title,
             'description' => $request->description,
-            'image_url' => $uploadedImage->getSecurePath(),  // Cloudinary URL
+            'image_url' => $url,
+            'cloudinary_public_id' => $public_id,
             'lat' => $request->lat,
             'lon' => $request->lon,
             'type' => $request->type ?? 'general',
@@ -75,7 +81,7 @@ class EventController extends Controller
             'location' => $request->location ?? 'Unknown',
             'is_public' => $request->input('is_public') == '1',
         ]);
-
+    
         return response()->json([
             'status' => true,
             'message' => 'Event created successfully',
@@ -120,73 +126,75 @@ class EventController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
-    {
-        // dd($request->name);
-        // $eventImage = Event::find($id);
-        // dd($eventImage);
+{
+    $validator = Validator::make(
+        $request->all(),
+        [
+            'title' => 'required',
+            'description' => 'required',
+            'lat' => 'required',
+            'lon' => 'required',
+            'date' => 'required',
+            'is_public' => 'nullable|boolean',
+            'location' => 'required',
+            'image' => 'nullable|file|mimes:jpg,jpeg,png',
+        ]
+    );
 
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => false,
+            'message' => "Validation error",
+            'errors' => $validator->errors(),
+        ], 422);
+    }
 
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'title' => 'required',
-                'description' => 'required',
-                'lat' => 'required',
-                'lon' => 'required',
-                'date' => 'required',
-                'is_public' => 'nullable|boolean',
-                'location' => 'required'
-            ]
-        );
-        if ($validator->fails()) {
+        $user = $request->user();
+        $event = Event::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$event) {
             return response()->json([
                 'status' => false,
-                'message' => "Cannot Update the Events in the DB::Validation error",
-                "error" => $validator->errors()
-            ], 300);
+                'message' => "Event not found or unauthorized",
+            ], 404);
         }
 
-        $eventImage = Event::select('id', 'image_url')->where('id', $id)->get();
-        // $eventImage = Event::find($id);
-        // dd($eventImage);
-        // if ($request->image != '') {
+        // If new image provided, upload new image and delete old from Cloudinary
         if ($request->hasFile('image')) {
-            $path = public_path() . '/uploads';
-            if ($eventImage[0]['image'] != '' && !$eventImage[0]['image']) {
-                $old_file = $path . $eventImage[0]['image'];
-                if (file_exists($old_file)) {
-                    unlink(filename: $old_file);
-                }
+            // Delete old image from Cloudinary if public_id exists
+            if (!empty($event->cloudinary_public_id)) {
+                Cloudinary::uploadApi()->destroy($event->cloudinary_public_id);
             }
-            $img = $request->image;
-            $ext = $img->getClientOriginalExtension();
-            $imageName = time() . '.' . $ext;
-            $img->move(public_path() . '/uploads', $imageName);
-        } else {
-            $imageName = $eventImage[0]['image'];
+
+            $filePath = $request->file('image')->getRealPath();
+            $uploadResult = Cloudinary::uploadApi()->upload($filePath, [
+                'folder' => 'events',
+            ]);
+
+            $url = $uploadResult['secure_url'];
+            $public_id = $uploadResult['public_id'];
+
+            $event->image_url = $url;
+            $event->cloudinary_public_id = $public_id;
         }
-        //Now Updating here
-        $user = $request->user();
-        $event = Event::where('id', $id)
-            ->where('user_id', $user->id) // 🔐 Ensure it's the user's own event
-            ->first();
-        $event->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'lat' => $request->lat,
-            'lon' => $request->lon,
-            'date' => $request->date,
-            'is_public' => $request->is_public,
-            'location' => $request->location
-        ]);
+
+        // Update other fields
+        $event->title = $request->title;
+        $event->description = $request->description;
+        $event->lat = $request->lat;
+        $event->lon = $request->lon;
+        $event->date = $request->date;
+        $event->is_public = $request->input('is_public', $event->is_public);
+        $event->location = $request->location;
+
+        $event->save();
 
         return response()->json([
             'status' => true,
-            'message' => "Event Updated successfully",
+            'message' => "Event updated successfully",
             'event' => $event,
         ], 200);
     }
-
     /**
      * Remove the specified resource from storage.
      */
@@ -203,11 +211,13 @@ class EventController extends Controller
             ], 403);
         }
 
-        $filePath = public_path('/uploads/' . $event->image_url);
-        if (file_exists($filePath)) {
-            unlink($filePath);
+        // Delete image from Cloudinary if public_id exists
+        if (!empty($event->cloudinary_public_id)) {
+            Cloudinary::uploadApi()->destroy($event->cloudinary_public_id);
         }
+
         $event->delete();
+
         return response()->json([
             'status' => true,
             'message' => "Event deleted successfully",
