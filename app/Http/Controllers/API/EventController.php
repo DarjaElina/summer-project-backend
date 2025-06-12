@@ -17,7 +17,6 @@ class EventController extends Controller
     {
         $events = Event::where('is_public', true)
             ->latest()
-            ->take(5)
             ->get();
     
         return response()->json(['events' => $events]);
